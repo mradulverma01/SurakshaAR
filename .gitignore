@@ -112,3 +112,7 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Build artifacts - do not ship
+/SurakshaAR-Alpha_BackUpThisFolder_ButDontShipItWithYourGame/
+/SurakshaAR_BurstDebugInformation_DoNotShip/
