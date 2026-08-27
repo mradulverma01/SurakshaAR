@@ -1,0 +1,20 @@
+{
+  "name": "SurakshaAR.Application",
+  "rootNamespace": "SurakshaAR.Application",
+  "references": [
+    "SurakshaAR.Content",
+    "SurakshaAR.Domain",
+    "SurakshaAR.Infrastructure",
+    "SurakshaAR.Remote",
+    "SurakshaAR.Scene"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,0 +1,17 @@
+{
+  "name": "SurakshaAR.Infrastructure",
+  "rootNamespace": "SurakshaAR.Infrastructure",
+  "references": [
+    "SurakshaAR.Domain",
+    "Newtonsoft.Json"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

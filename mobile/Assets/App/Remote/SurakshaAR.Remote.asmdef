@@ -1,0 +1,17 @@
+{
+  "name": "SurakshaAR.Remote",
+  "rootNamespace": "SurakshaAR.Remote",
+  "references": [
+    "SurakshaAR.Domain",
+    "SurakshaAR.Infrastructure"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

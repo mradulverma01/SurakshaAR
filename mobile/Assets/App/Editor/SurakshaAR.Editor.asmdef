@@ -1,0 +1,24 @@
+{
+  "name": "SurakshaAR.Editor",
+  "rootNamespace": "SurakshaAR.Editor",
+  "references": [
+    "SurakshaAR.Application",
+    "SurakshaAR.Content",
+    "SurakshaAR.Scene",
+    "Unity.TextMeshPro",
+    "Unity.XR.ARFoundation",
+    "Unity.XR.ARCore",
+    "Unity.XR.Management",
+    "Unity.XR.Management.Editor",
+    "Unity.XR.CoreUtils"
+  ],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

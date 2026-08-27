@@ -1,0 +1,25 @@
+{
+  "name": "@suraksha-ar/dashboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.0",
+    "@vitejs/plugin-react": "^5.0.2",
+    "vite": "^7.1.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "qrcode.react": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

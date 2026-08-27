@@ -1,0 +1,19 @@
+{
+  "name": "@suraksha-ar/backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "publish-scenarios": "tsx scripts/publish-scenarios.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

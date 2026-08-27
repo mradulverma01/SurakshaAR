@@ -1,0 +1,61 @@
+{
+  "id": "fire_001",
+  "version": 1,
+  "titleKey": "module.fire.title",
+  "passScore": 70,
+  "scene": { "sceneId": "FireTraining", "prefabId": "FireScenario" },
+  "interactions": [
+    { "id": "identify_hazard", "kind": "TargetSelected", "actionKind": "select", "targetId": "electrical_fire" },
+    { "id": "select_extinguisher", "kind": "TargetSelected", "actionKind": "select", "targetId": "co2_extinguisher" },
+    { "id": "remove_pin", "kind": "TargetSelected", "actionKind": "interact", "targetId": "extinguisher_pin" },
+    { "id": "aim", "kind": "TargetSelected", "actionKind": "aim", "targetId": "fire_base" },
+    { "id": "discharge", "kind": "CompletedHold", "actionKind": "hold", "targetId": "extinguisher_handle", "threshold": 3 },
+    { "id": "exit_route", "kind": "WaypointArrived", "actionKind": "waypoint_sequence", "targetId": "safe_exit_a", "orderedWaypoints": ["safe_exit_a"] }
+  ],
+  "steps": [
+    {
+      "id": "identify_hazard",
+      "cueKey": "fire.identify_hazard",
+      "score": 15,
+      "accept": [{ "kind": "select", "targetId": "electrical_fire" }]
+    },
+    {
+      "id": "select_extinguisher",
+      "cueKey": "fire.select_extinguisher",
+      "score": 20,
+      "accept": [{ "kind": "select", "targetId": "co2_extinguisher" }],
+      "wrongActions": [
+        {
+          "kind": "select",
+          "targetId": "water_extinguisher",
+          "penalty": 25,
+          "critical": true
+        }
+      ]
+    },
+    {
+      "id": "remove_pin",
+      "cueKey": "fire.remove_pin",
+      "score": 10,
+      "accept": [{ "kind": "interact", "targetId": "extinguisher_pin" }]
+    },
+    {
+      "id": "aim",
+      "cueKey": "fire.aim_at_base",
+      "score": 15,
+      "accept": [{ "kind": "aim", "targetId": "fire_base" }]
+    },
+    {
+      "id": "discharge",
+      "cueKey": "fire.discharge",
+      "score": 20,
+      "accept": [{ "kind": "hold", "targetId": "extinguisher_handle" }]
+    },
+    {
+      "id": "evacuate",
+      "cueKey": "fire.evacuate",
+      "score": 20,
+      "accept": [{ "kind": "waypoint_sequence", "targetId": "safe_exit_a" }]
+    }
+  ]
+}

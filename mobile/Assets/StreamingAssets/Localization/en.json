@@ -1,0 +1,24 @@
+{
+  "locale": "en",
+  "reviewStatus": "reviewed-source-language",
+  "strings": {
+    "app.title": "Suraksha AR",
+    "action.start": "Start training",
+    "status.offline": "Available offline",
+    "status.complete": "Training complete",
+    "module.fire.title": "Fire and explosion response",
+    "module.gas.title": "Gas leak and confined-space protocol",
+    "fire.identify_hazard": "Identify the fire before selecting equipment.",
+    "fire.select_extinguisher": "Select the correct extinguisher.",
+    "fire.remove_pin": "Remove the safety pin.",
+    "fire.aim_at_base": "Aim at the base of the fire.",
+    "fire.discharge": "Discharge the extinguisher.",
+    "fire.evacuate": "Follow the marked safe exit.",
+    "gas.recognize_zone": "Identify the gas hazard zone.",
+    "gas.withdraw": "Withdraw to the safe zone.",
+    "gas.report": "Report the hazard to the supervisor.",
+    "gas.select_self_rescuer": "Select the approved self-rescuer.",
+    "gas.buddy_check": "Confirm that your buddy is present.",
+    "gas.exit": "Follow the safe exit sequence."
+  }
+}

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype — Launcher preview (throwaway)</title>
+<style>
+  :root { --pad: 16px; --radius: 18px; }
+  body { margin:0; font-family: system-ui, sans-serif; background:#0b0f14; color:#e6eef7; }
+  header { padding:16px; position:sticky; top:0; background:#0b0f14; border-bottom:1px solid #1e2a36; }
+  h1 { margin:0; font-size:18px; }
+  .sub { opacity:.7; font-size:12px; }
+  .stage { padding:var(--pad); max-width:520px; margin:0 auto; padding-bottom:96px; }
+  .card { background:#121a24; border:1px solid #1e2a36; border-radius:var(--radius); padding:16px; margin:12px 0; }
+  .card h2 { margin:0 0 6px; font-size:16px; }
+  .card p { margin:0; opacity:.8; font-size:13px; }
+  .actions { display:grid; gap:10px; margin-top:12px; }
+  button { padding:14px 16px; border-radius:12px; border:0; font-weight:600; font-size:15px; }
+  .primary { background:#2a7fff; color:white; }
+  .ghost { background:#1e2a36; color:#e6eef7; }
+  .danger { background:#cc2f2f; color:white; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .pill { display:inline-block; padding:4px 8px; border-radius:999px; background:#1e2a36; font-size:11px; margin-right:6px; }
+  .hud { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); background:#121a24; border:1px solid #2a3a4d; border-radius:999px; padding:8px; display:flex; gap:6px; box-shadow:0 8px 24px rgba(0,0,0,.4); }
+  .hud button { padding:8px 12px; border-radius:999px; font-size:13px; }
+  .hud .on { background:#2a7fff; color:white; }
+  .state { font-family:ui-monospace, monospace; font-size:11px; background:#0a1018; border:1px solid #1e2a36; border-radius:12px; padding:10px; white-space:pre-wrap; word-break:break-word; }
+  .hidden { display:none; }
+  .lang { display:flex; gap:8px; margin-top:10px; }
+  .lang button { flex:1; }
+  img.mock { width:100%; border-radius:12px; background:#0e141d; border:1px dashed #2a3a4d; display:block; height:160px; object-fit:cover; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Suraksha AR — phone preview <span class="pill">PROTOTYPE</span></h1>
+  <div class="sub">Throwaway. No persistence. Open this file on your Android Chrome. State shows at bottom.</div>
+</header>
+<div class="stage" id="stage"></div>
+<div class="hud" id="hud"></div>
+<script>
+  const params = new URLSearchParams(location.search);
+  let variant = params.get("v") || "a";
+  let lang = params.get("lang") || "hi";
+  let route = params.get("r") || "launcher";
+  let selected = params.get("m") || "";
+  let step = parseInt(params.get("s") || "0", 10);
+  let hold = parseInt(params.get("h") || "0", 10);
+
+  const bundles = [
+    { id:"fire_001", title:{hi:"आग और विस्फोट", sat:"ᱥᱮᱝᱜᱮᱞ", en:"Fire & Explosion"}, steps:["electrical_fire","co2_extinguisher","extinguisher_pin","fire_base","hold 3s","safe_exit_a"], color:"#ff3b30" },
+    { id:"gas_001", title:{hi:"गैस लीक", sat:"ᱜᱟᱥ", en:"Gas Leak"}, steps:["methane_hazard_zone","safe_zone","supervisor_radio","approved_self_rescuer","buddy_present","safe_exit_a"], color:"#30d158" },
+  ];
+  const t = (bundle) => (bundle.title[lang] || bundle.title.en);
+
+  function setVariant(v){ variant=v; sync(); }
+  function setRoute(r){ route=r; sync(); }
+  function sync(){
+    const q = new URLSearchParams({v:variant, lang, r:route, m:selected, s:String(step), h:String(hold)}).toString();
+    history.replaceState(null,"","?"+q);
+    render();
+  }
+
+  function render(){
+    const stage = document.getElementById("stage");
+    stage.innerHTML = "";
+    if(route==="launcher") stage.appendChild(renderLauncher());
+    else stage.appendChild(renderTraining());
+    stage.appendChild(renderState());
+    renderHud();
+  }
+
+  function renderLauncher(){
+    const wrap = document.createElement("div");
+    if(variant==="a"){
+      const c = document.createElement("div"); c.className="card";
+      c.innerHTML = `<h2>${lang==="hi"?"प्रशिक्षण चुनें": lang==="sat"?"ᱥᱮᱪᱮᱫ ᱵᱟᱪᱷᱟᱣ": "Choose training"}</h2><p>${lang==="hi"?"ऑफ़लाइन बंडल — टैप करके शुरू करें":"Offline bundles — tap to start"}</p>`;
+      wrap.appendChild(c);
+      bundles.forEach(b=>{
+        const d = document.createElement("div"); d.className="card";
+        d.innerHTML = `<h2>${t(b)}</h2><p>${b.id} • ${b.steps.length} steps</p><div class="actions"><button class="primary" onclick="selected='${b.id}';route='training';step=0;sync()">Start ${b.id}</button></div>`;
+        wrap.appendChild(d);
+      });
+    }
+    if(variant==="b"){
+      const grid = document.createElement("div"); grid.className="grid2";
+      bundles.forEach(b=>{
+        const d = document.createElement("div"); d.className="card";
+        d.innerHTML = `<div class="pill" style="background:${b.color}22; border:1px solid ${b.color}">${b.id}</div><h2 style="margin-top:8px">${t(b)}</h2><img class="mock" alt="mock AR target"><div class="actions"><button class="primary" onclick="selected='${b.id}';route='training';step=0;sync()">Open</button></div>`;
+        grid.appendChild(d);
+      });
+      wrap.appendChild(grid);
+    }
+    if(variant==="c"){
+      const c = document.createElement("div"); c.className="card";
+      c.innerHTML = `<h2>Launcher — Hindi first</h2><p>Ol Chiki fallback shows English for missing keys. This is the dashboard's per-key fallback.</p>`;
+      const btns = document.createElement("div"); btns.className="actions";
+      bundles.forEach(b=>{
+        const btn = document.createElement("button"); btn.className="ghost"; btn.textContent=`${t(b)} — ${b.id}`; btn.onclick=()=>{selected=b.id; route="training"; step=0; sync();}; btns.appendChild(btn);
+      });
+      c.appendChild(btns); wrap.appendChild(c);
+    }
+    const langRow = document.createElement("div"); langRow.className="card lang";
+    langRow.innerHTML = `<button class="${lang==="hi"?"primary":"ghost"}" onclick="lang='hi';sync()">हिन्दी</button><button class="${lang==="sat"?"primary":"ghost"}" onclick="lang='sat';sync()">ᱥᱟᱱᱛᱟᱲᱤ</button><button class="${lang==="en"?"primary":"ghost"}" onclick="lang='en';sync()">English</button>`;
+    wrap.appendChild(langRow);
+    return wrap;
+  }
+
+  function renderTraining(){
+    const b = bundles.find(x=>x.id===selected) || bundles[0];
+    const wrap = document.createElement("div");
+    const header = document.createElement("div"); header.className="card";
+    header.innerHTML = `<h2>${t(b)} — ${b.id}</h2><p>Step ${step+1} / ${b.steps.length}: <b>${b.steps[step]||"done"}</b></p><img class="mock" alt="mock AR view"><p style="margin-top:8px">Mock: ${variant==="a"?"tap to advance": variant==="b"?"hold 3s for discharge, walk to exit": "position check for zones"}</p>`;
+    wrap.appendChild(header);
+    const actions = document.createElement("div"); actions.className="card";
+    if(step < b.steps.length){
+      const isHold = b.steps[step].includes("hold");
+      const isWaypoint = b.steps[step].includes("safe_exit");
+      const isZone = b.steps[step].includes("methane") || b.steps[step].includes("safe_zone");
+      if(isHold){
+        actions.innerHTML = `<h2>Hold discharge</h2><p>Hold ${hold}s / 3s. Short hold should be rejected.</p><div class="actions"><button class="primary" onmousedown="holdStart()" ontouchstart="holdStart()" onmouseup="holdEnd()" ontouchend="holdEnd()">Hold handle</button><button class="ghost" onclick="hold=1;sync()">Simulate 1s (short)</button><button class="ghost" onclick="hold=3;advance()">Simulate 3s (pass)</button></div>`;
+      } else if(isWaypoint){
+        actions.innerHTML = `<h2>Ordered evacuation</h2><p>Tapping the marker should not complete. Walk to waypoint.</p><div class="actions"><button class="ghost" onclick="tapExit()">Tap exit marker (should reject)</button><button class="primary" onclick="advance()">Walk to ${b.steps[step]} (WaypointArrived)</button></div>`;
+      } else if(isZone){
+        actions.innerHTML = `<h2>Zone check</h2><p>Entry uses device position, not tap.</p><div class="actions"><button class="ghost" onclick="advance()">Enter zone (ZoneEntered)</button><button class="ghost" onclick="advance()">Exit to safe zone (ZoneExited)</button></div>`;
+      } else {
+        actions.innerHTML = `<div class="actions"><button class="primary" onclick="advance()">Do: ${b.steps[step]}</button><button class="ghost" onclick="advance(true)">Do wrong order (should reject)</button></div>`;
+      }
+    } else {
+      actions.innerHTML = `<h2>Completed</h2><p>Returned to launcher.</p><div class="actions"><button class="primary" onclick="route='launcher';selected='';step=0;sync()">Back to launcher</button></div>`;
+    }
+    const leave = document.createElement("div"); leave.className="card";
+    leave.innerHTML = `<div class="actions"><button class="danger" onclick="route='launcher';selected='';step=0;sync()">Leave training (abandon)</button></div>`;
+    wrap.appendChild(actions); wrap.appendChild(leave);
+    return wrap;
+  }
+  function holdStart(){ hold=0; sync(); }
+  function holdEnd(){ /* handled by simulate buttons for prototype */ }
+  function advance(isWrong){
+    if(isWrong){ step = step; } else { step += 1; }
+    hold=0; sync();
+  }
+  function tapExit(){ /* rejected, stay */ sync(); }
+
+  function renderState(){
+    const d = document.createElement("div"); d.className="card";
+    const state = { variant, lang, route, selected, step, hold, launcher: bundles.map(b=>b.id), note: "PROTOTYPE — wipe me. State in URL and here." };
+    d.innerHTML = `<h2>State</h2><div class="state">${JSON.stringify(state, null, 2)}</div><p style="margin-top:8px; opacity:.7">Share this URL with ?v=a|b|c to switch variants.</p>`;
+    return d;
+  }
+  function renderHud(){
+    const hud = document.getElementById("hud");
+    hud.innerHTML = "";
+    ["a","b","c"].forEach(v=>{
+      const b = document.createElement("button"); b.textContent = "Variant "+v.toUpperCase(); b.className = variant===v?"on":"ghost"; b.onclick=()=>setVariant(v); hud.appendChild(b);
+    });
+    const r = document.createElement("button"); r.textContent="Launcher"; r.className=route==="launcher"?"on":"ghost"; r.onclick=()=>{route="launcher"; sync();}; hud.appendChild(r);
+    const t = document.createElement("button"); t.textContent="Training"; t.className=route==="training"?"on":"ghost"; t.onclick=()=>{route="training"; sync();}; hud.appendChild(t);
+  }
+  render();
+</script>
+</body>
+</html>

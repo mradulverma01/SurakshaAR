@@ -1,0 +1,62 @@
+{
+  "id": "gas_001",
+  "version": 1,
+  "titleKey": "module.gas.title",
+  "passScore": 70,
+  "scene": { "sceneId": "GasTraining", "prefabId": "GasScenario" },
+  "interactions": [
+    { "id": "recognize_hazard_zone", "kind": "TargetSelected", "actionKind": "select", "targetId": "methane_hazard_zone" },
+    { "id": "enter_hazard_zone", "kind": "ZoneEntered", "actionKind": "waypoint_enter", "targetId": "methane_hazard_zone" },
+    { "id": "withdraw", "kind": "ZoneExited", "actionKind": "waypoint_enter", "targetId": "safe_zone" },
+    { "id": "report_hazard", "kind": "TargetSelected", "actionKind": "interact", "targetId": "supervisor_radio" },
+    { "id": "select_ppe", "kind": "TargetSelected", "actionKind": "select", "targetId": "approved_self_rescuer" },
+    { "id": "buddy_check", "kind": "TargetSelected", "actionKind": "confirm", "targetId": "buddy_present" },
+    { "id": "exit_route", "kind": "WaypointArrived", "actionKind": "waypoint_sequence", "targetId": "safe_exit_a", "orderedWaypoints": ["safe_exit_a"] }
+  ],
+  "steps": [
+    {
+      "id": "recognize_hazard_zone",
+      "cueKey": "gas.recognize_zone",
+      "score": 15,
+      "accept": [{ "kind": "select", "targetId": "methane_hazard_zone" }],
+      "wrongActions": [
+        {
+          "kind": "waypoint_enter",
+          "targetId": "methane_hazard_zone",
+          "penalty": 30,
+          "critical": true
+        }
+      ]
+    },
+    {
+      "id": "withdraw",
+      "cueKey": "gas.withdraw",
+      "score": 20,
+      "accept": [{ "kind": "waypoint_enter", "targetId": "safe_zone" }]
+    },
+    {
+      "id": "report_hazard",
+      "cueKey": "gas.report",
+      "score": 15,
+      "accept": [{ "kind": "interact", "targetId": "supervisor_radio" }]
+    },
+    {
+      "id": "select_ppe",
+      "cueKey": "gas.select_self_rescuer",
+      "score": 15,
+      "accept": [{ "kind": "select", "targetId": "approved_self_rescuer" }]
+    },
+    {
+      "id": "buddy_check",
+      "cueKey": "gas.buddy_check",
+      "score": 15,
+      "accept": [{ "kind": "confirm", "targetId": "buddy_present" }]
+    },
+    {
+      "id": "exit",
+      "cueKey": "gas.exit",
+      "score": 20,
+      "accept": [{ "kind": "waypoint_sequence", "targetId": "safe_exit_a" }]
+    }
+  ]
+}
