@@ -4,7 +4,7 @@
 
 ### Issue tracker
 
-Issues use GitHub Issues. See `docs/agents/issue-tracker.md`.
+Issues use GitHub Issues in `mradulverma01/SurakshaAR`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
