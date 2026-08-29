@@ -30,7 +30,7 @@
   --signal-border: var(--sage);
 
   /* Danger / fail - earthy brick, accessible on dark */
-  --danger: #C97B5D;
+  --danger: var(--taupe);
   --danger-text: #E6B9A3;
   --danger-soft: #D9A08B;
   --danger-bg: #3D2E28;
@@ -197,7 +197,7 @@ td { border-top: 1px solid var(--line); padding: 17px 12px; font-size: 13px; col
   letter-spacing: 0.08em;
   transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
 }
-.primary-button:hover { background: #6B8470; border-color: #6B8470; }
+.primary-button:hover { background: var(--forest); border-color: var(--forest); }
 .primary-button:active { background: var(--forest); border-color: var(--forest); transform: translateY(1px); }
 .primary-button:disabled { opacity: .6; cursor: wait; background: var(--taupe); border-color: var(--taupe); }
 .form-error { color: var(--danger-soft); font-size: 12px; }

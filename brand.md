@@ -66,18 +66,15 @@ The interface should feel calm and focused. Avoid visual clutter, excessive deco
 
 ## Color system
 
-Use a dark coal-inspired base with high-visibility safety colors.
+Use the captain-approved Forest Green and Brown palette consistently across the dashboard and product surfaces.
 
 | Name | Hex | Use |
 | --- | --- | --- |
-| Coal black | `#15191C` | Main background and deep surfaces |
-| Graphite | `#252B30` | Cards, panels, and secondary surfaces |
-| Warm ash | `#F1EEE7` | Main text on dark surfaces |
-| Safety yellow | `#F4C542` | Primary actions and progress |
-| Signal orange | `#F47B35` | Active attention and equipment cues |
-| Safe green | `#3FA66B` | Confirmed safe states and completed steps |
-| Warning red | `#D94A45` | Hazards, critical failures, and blocked actions |
-| AR blue | `#4C91D9` | Spatial markers and tracking states |
+| Sage Green | `#5F725D` | Primary positive accent, focus, and progress |
+| Forest Green | `#2E4B36` | Positive surfaces, actions, and safe states |
+| Deep Moss/Charcoal | `#353A31` | Main panels and deep surfaces |
+| Earthy Taupe/Brown | `#4F473B` | Borders, controls, and failure states |
+| Dark Espresso | `#312E28` | Main background and text-supporting surfaces |
 
 Do not use color alone to communicate status. Pair color with a label, icon, or short sentence. Check contrast on Android devices, including Hindi and Ol Chiki text.
 
