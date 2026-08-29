@@ -14,6 +14,7 @@ export type ModulePerformance = {
 };
 
 export type CertificateStatus = "valid" | "revoked" | "expired";
+/** Status values persisted by the backend. Expiry is derived from expiresAt. */
 export type StoredCertificateStatus = "valid" | "revoked";
 
 export type CertificateSummary = {
@@ -41,12 +42,14 @@ export type CertificateVerification = {
   valid: boolean;
   certificateCode: string;
   issuer?: string;
+  /** Raw backend title key, retained for API compatibility. */
   moduleTitleKey?: string;
   moduleVersion?: number;
   score?: number;
   issuedAt?: string;
   expiresAt?: string | null;
-  status?: StoredCertificateStatus;
+  /** Display status; expiry is derived from expiresAt after the backend response. */
+  status?: CertificateStatus;
 };
 
 export type AttemptResult = "passed" | "failed" | "critical_failure";

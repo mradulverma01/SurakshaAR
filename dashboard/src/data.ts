@@ -475,9 +475,14 @@ export async function verifyCertificate(code: string): Promise<CertificateVerifi
 
   const verification = body as CertificateVerification;
   // Type-safe transform: display title instead of raw title_key, preserve contract.
+  const expiresAt = verification.expiresAt ?? null;
   return {
     ...verification,
     certificateCode: normalizeCertificateCode(verification.certificateCode ?? certificateCode),
+    // Expiry is derived locally because the persisted status intentionally has no
+    // `expired` value. This keeps the backend contract intact while making the
+    // verification result agree with the dashboard certificate status.
+    status: getCertificateDisplayStatus(verification.status ?? "valid", expiresAt),
     moduleTitleKey: verification.moduleTitleKey ? displayModuleTitle(verification.moduleTitleKey) : undefined,
   };
 }
