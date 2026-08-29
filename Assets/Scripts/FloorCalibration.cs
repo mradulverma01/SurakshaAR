@@ -38,11 +38,20 @@ public class FloorCalibration : MonoBehaviour
 
     private void Awake()
     {
-        raycastManager = GetComponent<ARRaycastManager>();
+        raycastManager =
+            GetComponent<ARRaycastManager>();
+
+        if (raycastManager == null)
+        {
+            Debug.LogError(
+                "FloorCalibration requires ARRaycastManager."
+            );
+        }
 
         if (reticlePrefab != null)
         {
             reticle = Instantiate(reticlePrefab);
+
             reticle.SetActive(false);
         }
     }
@@ -104,37 +113,39 @@ public class FloorCalibration : MonoBehaviour
             Screen.height * screenHeightTarget
         );
 
-        bool hitSomething = raycastManager.Raycast(
-            floorTarget,
-            hits,
-            TrackableType.Depth
-        );
+        bool hitSomething =
+            raycastManager.Raycast(
+                floorTarget,
+                hits,
+                TrackableType.Depth
+            );
 
         if (!hitSomething)
             return;
 
         Pose hitPose = hits[0].pose;
 
-        float distance = Vector3.Distance(
-            Camera.main.transform.position,
-            hitPose.position
-        );
+        float distance =
+            Vector3.Distance(
+                Camera.main.transform.position,
+                hitPose.position
+            );
 
         if (distance < minimumDistance ||
             distance > maximumDistance)
-        {
             return;
-        }
 
-        float floorAlignment = Vector3.Dot(
-            hitPose.up,
-            Vector3.up
-        );
+        float floorAlignment =
+            Vector3.Dot(
+                hitPose.up,
+                Vector3.up
+            );
 
         if (floorAlignment < 0.85f)
             return;
 
-        currentPosition = hitPose.position;
+        currentPosition =
+            hitPose.position;
 
         validFloor = true;
     }
@@ -156,7 +167,8 @@ public class FloorCalibration : MonoBehaviour
         if (samples.Count < requiredSamples)
             return;
 
-        Vector3 average = Vector3.zero;
+        Vector3 average =
+            Vector3.zero;
 
         foreach (Vector3 sample in samples)
         {
@@ -232,11 +244,12 @@ public class FloorCalibration : MonoBehaviour
 
         if (trainingAreaPrefab != null)
         {
-            spawnedTrainingArea = Instantiate(
-                trainingAreaPrefab,
-                currentPosition,
-                Quaternion.identity
-            );
+            spawnedTrainingArea =
+                Instantiate(
+                    trainingAreaPrefab,
+                    currentPosition,
+                    Quaternion.identity
+                );
 
             Invoke(
                 nameof(StartFireTraining),

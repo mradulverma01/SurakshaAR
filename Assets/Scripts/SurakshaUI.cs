@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SurakshaUI : MonoBehaviour
 {
@@ -11,9 +12,20 @@ public class SurakshaUI : MonoBehaviour
     [SerializeField] private TMP_Text instructionText;
     [SerializeField] private TMP_Text progressText;
 
+    [Header("Action Button")]
+    [SerializeField] private Button actionButton;
+    [SerializeField] private TMP_Text actionButtonText;
+
     private void Awake()
     {
         Instance = this;
+
+        if (actionButton != null)
+        {
+            actionButton.onClick.RemoveAllListeners();
+            actionButton.onClick.AddListener(OnActionButtonPressed);
+            actionButton.gameObject.SetActive(false);
+        }
     }
 
     private void Start()
@@ -21,11 +33,17 @@ public class SurakshaUI : MonoBehaviour
         ShowScanning();
     }
 
+    // =========================================================
+    // FLOOR CALIBRATION
+    // =========================================================
+
     public void ShowScanning()
     {
+        HideActionButton();
+
         SetUI(
             "SURAKSHA AR",
-            "🔍 SCANNING FLOOR",
+            "SCANNING FLOOR",
             "Point your camera at a clear area of floor.",
             "Scanning..."
         );
@@ -33,11 +51,14 @@ public class SurakshaUI : MonoBehaviour
 
     public void ShowFloorDetected(float progress)
     {
-        int percentage = Mathf.RoundToInt(progress * 100f);
+        HideActionButton();
+
+        int percentage =
+            Mathf.RoundToInt(progress * 100f);
 
         SetUI(
             "SURAKSHA AR",
-            "🟢 FLOOR DETECTED",
+            "FLOOR DETECTED",
             "Keep your phone steady.",
             "Stability: " + percentage + "%"
         );
@@ -45,9 +66,11 @@ public class SurakshaUI : MonoBehaviour
 
     public void ShowFloorReady()
     {
+        HideActionButton();
+
         SetUI(
             "SURAKSHA AR",
-            "✓ FLOOR READY",
+            "FLOOR READY",
             "Tap the screen to lock this training area.",
             "Ready"
         );
@@ -55,19 +78,27 @@ public class SurakshaUI : MonoBehaviour
 
     public void ShowFloorLocked()
     {
+        HideActionButton();
+
         SetUI(
             "SURAKSHA AR",
-            "🔒 FLOOR LOCKED",
+            "FLOOR LOCKED",
             "Training area is being prepared.",
             "100%"
         );
     }
 
+    // =========================================================
+    // FIRE TRAINING
+    // =========================================================
+
     public void ShowFireTraining()
     {
+        HideActionButton();
+
         SetUI(
             "FIRE SAFETY",
-            "🔥 FIRE DETECTED",
+            "FIRE DETECTED",
             "Tap the fire extinguisher to begin.",
             ""
         );
@@ -78,9 +109,11 @@ public class SurakshaUI : MonoBehaviour
         string instruction
     )
     {
+        ShowActionButton("CONTINUE");
+
         SetUI(
             "FIRE SAFETY",
-            "🧯 STEP " + step + " / 4",
+            "STEP " + step + " / 4",
             instruction,
             "Training in progress"
         );
@@ -88,13 +121,52 @@ public class SurakshaUI : MonoBehaviour
 
     public void ShowComplete()
     {
+        HideActionButton();
+
         SetUI(
             "FIRE SAFETY",
-            "✓ FIRE EXTINGUISHED",
+            "FIRE EXTINGUISHED",
             "Excellent! The fire response procedure is complete.",
             "TRAINING COMPLETE"
         );
     }
+
+    // =========================================================
+    // ACTION BUTTON
+    // =========================================================
+
+    private void OnActionButtonPressed()
+    {
+        if (FireExtinguisherInteraction.Instance != null)
+        {
+            FireExtinguisherInteraction.Instance.PerformStep();
+        }
+    }
+
+    private void ShowActionButton(string text)
+    {
+        if (actionButton == null)
+            return;
+
+        actionButton.gameObject.SetActive(true);
+
+        if (actionButtonText != null)
+        {
+            actionButtonText.text = text;
+        }
+    }
+
+    private void HideActionButton()
+    {
+        if (actionButton != null)
+        {
+            actionButton.gameObject.SetActive(false);
+        }
+    }
+
+    // =========================================================
+    // GENERAL UI
+    // =========================================================
 
     private void SetUI(
         string title,
@@ -114,5 +186,24 @@ public class SurakshaUI : MonoBehaviour
 
         if (progressText != null)
             progressText.text = progress;
+    }
+    public void ContinueTraining()
+   {
+    Debug.Log("CONTINUE BUTTON PRESSED");
+
+    FireExtinguisherInteraction fire =
+        FindFirstObjectByType<FireExtinguisherInteraction>();
+
+    if (fire != null)
+    {
+        Debug.Log("FireExtinguisherInteraction FOUND");
+        fire.PerformStep();
+    }
+    else
+    {
+        Debug.LogError(
+            "FireExtinguisherInteraction NOT FOUND!"
+        );
+    }
     }
 }
