@@ -12,7 +12,7 @@ public sealed class FireBasicsLearningSessionTests
 
         session.ShowAnimation();
         session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
-        session.TapFireTriangle();
+        var question = session.TapFireTriangle();
         var state = session.Answer(FireBasicsAnswer.HeatFuelAndOxygen);
         var completed = session.Continue();
 
@@ -22,6 +22,7 @@ public sealed class FireBasicsLearningSessionTests
             Assert.That(state.Feedback, Is.EqualTo(FireBasicsFeedback.Correct));
             Assert.That(state.FeedbackText, Does.Contain("heat, fuel, and oxygen"));
             Assert.That(completed.Stage, Is.EqualTo(FireBasicsLearningStage.Completed));
+            Assert.That(question.Question, Is.EqualTo("What three elements sustain a fire?"));
         });
     }
 

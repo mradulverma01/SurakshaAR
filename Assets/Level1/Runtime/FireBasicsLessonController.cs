@@ -113,11 +113,17 @@ public sealed class FireBasicsLessonController : MonoBehaviour
 
     private Button CreateFireTriangle(Transform parent)
     {
-        Button button = CreateButton("Fire triangle", parent, out Text label);
-        SetRect(button.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 25f), new Vector2(500f, 420f));
-        button.GetComponent<Image>().color = new Color(0.28f, 0.1f, 0.03f);
+        var triangleObject = new GameObject("Fire triangle", typeof(RectTransform), typeof(FireTriangleGraphic), typeof(Button));
+        triangleObject.transform.SetParent(parent, false);
+        Button button = triangleObject.GetComponent<Button>();
+        FireTriangleGraphic graphic = triangleObject.GetComponent<FireTriangleGraphic>();
+        graphic.color = new Color(0.75f, 0.2f, 0.03f);
+        button.targetGraphic = graphic;
+        SetRect(triangleObject.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 25f), new Vector2(500f, 420f));
+
+        Text label = CreateText("Text", triangleObject.transform, 38, TextAnchor.MiddleCenter, Color.white);
+        Stretch(label.rectTransform);
         label.text = "FIRE\nTRIANGLE";
-        label.fontSize = 38;
         button.onClick.AddListener(TapFireTriangle);
 
         AddTriangleLabel(button.transform, "HEAT", new Vector2(0f, 130f), new Color(1f, 0.35f, 0.08f));
@@ -175,7 +181,7 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         progress.text = state.Stage == FireBasicsLearningStage.Completed ? "What is fire? complete" : "Level 1 | Fire basics | Lesson 1";
         body.text = state.Stage == FireBasicsLearningStage.Completed
             ? "You completed the What is fire? lesson. Follow your facility emergency action plan and only attempt firefighting when authorized, trained, and safe to do so."
-            : state.LessonText;
+            : state.Stage == FireBasicsLearningStage.Question ? state.Question : state.LessonText;
 
         bool showVisual = state.Stage == FireBasicsLearningStage.Picture
             || state.Stage == FireBasicsLearningStage.Animation
@@ -267,5 +273,24 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         rectTransform.anchorMax = anchorMax;
         rectTransform.anchoredPosition = position;
         rectTransform.sizeDelta = size;
+    }
+}
+
+public sealed class FireTriangleGraphic : Graphic
+{
+    protected override void OnPopulateMesh(VertexHelper vertexHelper)
+    {
+        vertexHelper.Clear();
+        Rect rect = rectTransform.rect;
+        UIVertex vertex = UIVertex.simpleVert;
+        vertex.color = color;
+
+        vertex.position = new Vector3(0f, rect.yMax, 0f);
+        vertexHelper.AddVert(vertex);
+        vertex.position = new Vector3(rect.xMin, rect.yMin, 0f);
+        vertexHelper.AddVert(vertex);
+        vertex.position = new Vector3(rect.xMax, rect.yMin, 0f);
+        vertexHelper.AddVert(vertex);
+        vertexHelper.AddTriangle(0, 1, 2);
     }
 }
