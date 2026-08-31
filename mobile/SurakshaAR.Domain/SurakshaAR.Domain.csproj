@@ -9,5 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../Assets/App/Domain/**/*.cs" LinkBase="Domain" />
+    <Compile Include="../../Assets/Level1/Runtime/FireBasicsLearningSession.cs" Link="Level1/FireBasicsLearningSession.cs" />
   </ItemGroup>
 </Project>
