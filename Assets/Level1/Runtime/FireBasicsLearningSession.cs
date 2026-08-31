@@ -59,6 +59,8 @@ namespace SurakshaAR.Level1
 
     public sealed class FireBasicsLearningSession
     {
+        public const float AnimationDurationSeconds = 2.4f;
+
         private FireBasicsLearningState state = NewState(FireBasicsLearningStage.Picture);
 
         public FireBasicsLearningState State => state;
@@ -68,8 +70,13 @@ namespace SurakshaAR.Level1
             return Advance(FireBasicsLearningStage.Picture, FireBasicsLearningStage.Animation);
         }
 
-        public FireBasicsLearningState FinishAnimation()
+        public FireBasicsLearningState FinishAnimation(float elapsedSeconds)
         {
+            if (elapsedSeconds < AnimationDurationSeconds)
+            {
+                return state;
+            }
+
             return Advance(FireBasicsLearningStage.Animation, FireBasicsLearningStage.Interaction);
         }
 

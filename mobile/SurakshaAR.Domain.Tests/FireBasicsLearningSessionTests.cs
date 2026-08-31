@@ -11,7 +11,7 @@ public sealed class FireBasicsLearningSessionTests
         var session = new FireBasicsLearningSession();
 
         session.ShowAnimation();
-        session.FinishAnimation();
+        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
         session.TapFireTriangle();
         var state = session.Answer(FireBasicsAnswer.HeatFuelAndOxygen);
         var completed = session.Continue();
@@ -31,7 +31,7 @@ public sealed class FireBasicsLearningSessionTests
         var session = new FireBasicsLearningSession();
 
         session.ShowAnimation();
-        session.FinishAnimation();
+        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
         session.TapFireTriangle();
         var state = session.Answer(FireBasicsAnswer.SmokeAndFlames);
 
@@ -48,7 +48,7 @@ public sealed class FireBasicsLearningSessionTests
     {
         var session = new FireBasicsLearningSession();
 
-        session.FinishAnimation();
+        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
         session.TapFireTriangle();
         session.Answer(FireBasicsAnswer.HeatFuelAndOxygen);
 
@@ -58,8 +58,19 @@ public sealed class FireBasicsLearningSessionTests
         session.TapFireTriangle();
         Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Animation));
 
-        session.FinishAnimation();
+        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
         session.Answer(FireBasicsAnswer.HeatFuelAndOxygen);
         Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Interaction));
+    }
+
+    [Test]
+    public void Short_animation_does_not_enable_the_fire_triangle_interaction()
+    {
+        var session = new FireBasicsLearningSession();
+
+        session.ShowAnimation();
+        var state = session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds - 0.1f);
+
+        Assert.That(state.Stage, Is.EqualTo(FireBasicsLearningStage.Animation));
     }
 }

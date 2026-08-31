@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public sealed class FireBasicsLessonController : MonoBehaviour
 {
-    private const float AnimationDuration = 2.4f;
-
     private readonly Color backgroundColor = new Color(0.04f, 0.08f, 0.12f);
     private readonly Color panelColor = new Color(0.08f, 0.16f, 0.22f);
     private readonly Color accentColor = new Color(1f, 0.42f, 0.08f);
@@ -23,7 +21,7 @@ public sealed class FireBasicsLessonController : MonoBehaviour
     private Button fireTriangleButton = null!;
     private Button[] answerButtons = null!;
     private Text[] answerButtonTexts = null!;
-    private float animationEndsAt;
+    private float animationStartedAt;
 
     private void Start()
     {
@@ -42,10 +40,9 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         float pulse = 1f + (Mathf.Sin(Time.unscaledTime * 8f) + 1f) * 0.04f;
         fireTriangleButton.transform.localScale = Vector3.one * pulse;
 
-        if (Time.unscaledTime >= animationEndsAt)
+        if (session.FinishAnimation(Time.unscaledTime - animationStartedAt).Stage != FireBasicsLearningStage.Animation)
         {
             fireTriangleButton.transform.localScale = Vector3.one;
-            session.FinishAnimation();
             Render();
         }
     }
@@ -146,7 +143,7 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         {
             case FireBasicsLearningStage.Picture:
                 session.ShowAnimation();
-                animationEndsAt = Time.unscaledTime + AnimationDuration;
+                animationStartedAt = Time.unscaledTime;
                 break;
             case FireBasicsLearningStage.Feedback:
                 session.Continue();
