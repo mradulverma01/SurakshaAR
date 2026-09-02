@@ -6,17 +6,48 @@ using UnityEngine.UI;
 
 public sealed class FireBasicsLessonController : MonoBehaviour
 {
-    // Duolingo palette
-    private readonly Color duoBackground = new Color(0.97f, 0.97f, 0.97f); // #F7F7F7
-    private readonly Color duoWhite = Color.white;
-    private readonly Color duoLightGray = new Color(0.90f, 0.90f, 0.90f); // #E5E5E5
-    private readonly Color duoGreen = new Color(0.345f, 0.80f, 0.008f); // #58CC02
-    private readonly Color duoGreenShadow = new Color(0.345f, 0.655f, 0.0f); // #58A700
-    private readonly Color duoBlue = new Color(0.11f, 0.69f, 0.96f); // #1CB0F6
-    private readonly Color duoYellow = new Color(1f, 0.59f, 0f); // #FF9600
-    private readonly Color duoRed = new Color(1f, 0.294f, 0.294f); // #FF4B4B
-    private readonly Color duoDarkText = new Color(0.29f, 0.29f, 0.29f); // #4B4B4B
-    private readonly Color duoMidText = new Color(0.47f, 0.47f, 0.47f); // #777777
+    // Design System tokens (exact from Duolingo-inspired design system)
+    // Colors
+    private readonly Color bgLayout = Hex("#f7f7f7");        // --brand-color-bg-layout / --surface
+    private readonly Color bgContainer = Hex("#ffffff");      // --brand-color-bg-container
+    private readonly Color fg = Hex("#3c3c3c");               // --brand-color-text
+    private readonly Color muted = Hex("#777777");            // --brand-color-text-secondary
+    private readonly Color border = Hex("#e5e5e5");           // --brand-color-border
+    private readonly Color accent = Hex("#58cc02");           // --brand-color-primary (Owl Green)
+    private readonly Color accentPressed = Hex("#58a700");    // --brand-color-primary-active
+    private readonly Color accentHover = Hex("#89e219");      // --brand-color-primary-hover
+    private readonly Color accentSecondary = Hex("#ff9600");  // --brand-color-warning (Streak Orange)
+    private readonly Color info = Hex("#1cb0f6");             // --brand-color-info
+    private readonly Color error = Hex("#ff4b4b");            // --brand-color-error
+    private readonly Color errorBg = Hex("#fff2f0");          // --brand-color-error-bg
+    private readonly Color successBg = Hex("#f5ffe6");        // --brand-color-success-bg
+    private readonly Color warningBg = Hex("#fff9e6");        // --brand-color-warning-bg
+    private readonly Color infoBg = Hex("#e8fbff");           // --brand-color-info-bg
+
+    // Sizing (4px base scale)
+    private const float Space1 = 4f;
+    private const float Space2 = 8f;
+    private const float Space3 = 12f;
+    private const float Space4 = 16f;
+    private const float Space6 = 24f;
+    private const float Space8 = 32f;
+    private const float Space12 = 48f;
+
+    // Border radius
+    private const float RadiusCard = 16f;
+    private const float RadiusPill = 9999f;
+
+    // Border width (2px standard, 4px bottom on tactile controls)
+    private const float BorderWidth = 2f;
+    private const float BorderBottom = 4f;
+
+    // Control heights
+    private const float ControlHeight = 48f;
+    private const float ControlHeightLg = 60f;
+
+    // Motion
+    private const float MotionFast = 0.18f;
+    private const float MotionMid = 0.36f;
 
     private FireBasicsLearningSession session = null!;
     private Text title = null!;
@@ -27,11 +58,14 @@ public sealed class FireBasicsLessonController : MonoBehaviour
     private Text feedback = null!;
     private Button primaryButton = null!;
     private Text primaryButtonText = null!;
-    private Image primaryButtonImage = null!;
+    private Image primaryButtonBg = null!;
+    private Image primaryButtonShadow = null!;
     private Button fireTriangleButton = null!;
+    private FireTriangleGraphic fireTriangleGraphic = null!;
     private Button[] answerButtons = null!;
     private Text[] answerButtonTexts = null!;
-    private Image[] answerButtonImages = null!;
+    private Image[] answerButtonBgs = null!;
+    private Image[] answerButtonShadows = null!;
     private float animationStartedAt;
 
     private void Start()
@@ -72,139 +106,127 @@ public sealed class FireBasicsLessonController : MonoBehaviour
 
         EnsureEventSystem();
 
-        Image background = CreateImage("Background", canvasObject.transform, duoBackground);
+        // Root background (layout bg)
+        Image background = CreateImage("Background", canvasObject.transform, bgLayout);
         Stretch(background.rectTransform);
 
-        // Top bar — Duolingo style: white header with progress
-        Image topBar = CreateImage("TopBar", canvasObject.transform, duoWhite);
-        SetRect(topBar.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -55f), new Vector2(0f, 110f));
+        // Top bar — white header with progress (Duolingo style)
+        Image topBar = CreateImage("TopBar", canvasObject.transform, bgContainer);
+        SetRect(topBar.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -(Space8 + Space4)), new Vector2(0f, Space8 * 2 + Space4));
         topBar.rectTransform.offsetMin = new Vector2(0f, topBar.rectTransform.offsetMin.y);
         topBar.rectTransform.offsetMax = new Vector2(0f, topBar.rectTransform.offsetMax.y);
 
-        Text closeText = CreateText("Close", topBar.transform, 44, TextAnchor.MiddleCenter, duoMidText);
-        SetRect(closeText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(60f, 0f), new Vector2(60f, 60f));
-        closeText.text = "×";
-        closeText.fontStyle = FontStyle.Bold;
+        // Progress bar in top bar
+        Image progressBg = CreateImage("ProgressBg", topBar.transform, border);
+        SetRect(progressBg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(Space6, 0f), new Vector2(780f, 22f));
+        AddBorder(progressBg, border, BorderWidth);
 
-        Image progressBg = CreateImage("ProgressBg", topBar.transform, duoLightGray);
-        SetRect(progressBg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(20f, 0f), new Vector2(780f, 22f));
-
-        progressFill = CreateImage("ProgressFill", progressBg.transform, duoGreen);
+        progressFill = CreateImage("ProgressFill", progressBg.transform, accent);
         progressFill.rectTransform.anchorMin = new Vector2(0f, 0f);
         progressFill.rectTransform.anchorMax = new Vector2(0f, 1f);
         progressFill.rectTransform.pivot = new Vector2(0f, 0.5f);
         progressFill.rectTransform.anchoredPosition = Vector2.zero;
         progressFill.rectTransform.sizeDelta = new Vector2(0f, 0f);
 
-        // Lesson card — white rounded-card look with subtle shadow
-        Image cardShadow = CreateImage("CardShadow", canvasObject.transform, duoLightGray);
-        SetRect(cardShadow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -16f), new Vector2(960f, 1420f));
+        // Lesson card — white with 2px border + 4px bottom border (tactile)
+        Image card = CreateImage("Lesson card", canvasObject.transform, bgContainer);
+        SetRect(card.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(960f, 1420f));
+        AddBorder(card, border, BorderWidth, BorderBottom);
+        card.rectTransform.offsetMin = new Vector2(card.rectTransform.offsetMin.x, card.rectTransform.offsetMin.y);
+        card.rectTransform.offsetMax = new Vector2(card.rectTransform.offsetMax.x, card.rectTransform.offsetMax.y);
 
-        Image card = CreateImage("Lesson card", canvasObject.transform, duoWhite);
-        SetRect(card.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(960f, 1420f));
-
-        title = CreateText("Title", card.transform, 58, TextAnchor.MiddleCenter, duoDarkText);
+        // Title
+        title = CreateText("Title", card.transform, 58, TextAnchor.MiddleCenter, fg);
         title.fontStyle = FontStyle.Bold;
-        SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -80f), new Vector2(860f, 90f));
+        SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -(Space8 + Space6)), new Vector2(860f, 90f));
 
-        progressLabel = CreateText("Progress", card.transform, 26, TextAnchor.MiddleCenter, duoYellow);
+        // Progress label (Streak Orange)
+        progressLabel = CreateText("Progress", card.transform, 26, TextAnchor.MiddleCenter, accentSecondary);
         progressLabel.fontStyle = FontStyle.Bold;
-        SetRect(progressLabel.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(860f, 40f));
+        SetRect(progressLabel.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -(Space8 * 2 + Space4)), new Vector2(860f, 40f));
 
-        body = CreateText("Lesson text", card.transform, 32, TextAnchor.UpperCenter, duoDarkText);
+        // Body text
+        body = CreateText("Lesson text", card.transform, 32, TextAnchor.UpperCenter, fg);
         body.lineSpacing = 1.1f;
-        SetRect(body.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(840f, 170f));
+        SetRect(body.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -(Space8 * 3 + Space6 + Space4)), new Vector2(840f, 170f));
 
+        // Fire triangle interaction
         fireTriangleButton = CreateFireTriangle(card.transform);
 
-        prompt = CreateText("Prompt", card.transform, 28, TextAnchor.MiddleCenter, duoMidText);
+        // Prompt
+        prompt = CreateText("Prompt", card.transform, 28, TextAnchor.MiddleCenter, muted);
         prompt.fontStyle = FontStyle.Bold;
-        SetRect(prompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -175f), new Vector2(840f, 50f));
+        SetRect(prompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -Space6), new Vector2(840f, 50f));
 
-        feedback = CreateText("Feedback", card.transform, 30, TextAnchor.UpperCenter, duoDarkText);
+        // Feedback
+        feedback = CreateText("Feedback", card.transform, 30, TextAnchor.UpperCenter, fg);
         feedback.lineSpacing = 1.05f;
-        SetRect(feedback.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(820f, 200f));
+        SetRect(feedback.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, Space6), new Vector2(820f, 200f));
 
+        // Answer buttons — Duolingo pill style with 3D shadow
         answerButtons = new Button[3];
         answerButtonTexts = new Text[3];
-        answerButtonImages = new Image[3];
+        answerButtonBgs = new Image[3];
+        answerButtonShadows = new Image[3];
         for (int index = 0; index < answerButtons.Length; index++)
         {
             FireBasicsAnswer answer = (FireBasicsAnswer)index;
-            Button button = CreateDuolingoAnswerButton("Answer " + (index + 1), card.transform, out Text buttonText, out Image buttonImage);
-            SetRect(button.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -360f - index * 118f), new Vector2(820f, 96f));
-            button.onClick.AddListener(() => SelectAnswer(answer));
+            CreateDuolingoAnswerButton(card.transform, answer, index, out Button button, out Text buttonText, out Image buttonBg, out Image buttonShadow);
             answerButtons[index] = button;
             answerButtonTexts[index] = buttonText;
-            answerButtonImages[index] = buttonImage;
+            answerButtonBgs[index] = buttonBg;
+            answerButtonShadows[index] = buttonShadow;
         }
 
-        // Primary button with Duolingo 3D effect: green + darker bottom strip
-        var primaryContainer = new GameObject("PrimaryContainer", typeof(RectTransform));
-        primaryContainer.transform.SetParent(card.transform, false);
-        RectTransform primaryContainerRect = primaryContainer.GetComponent<RectTransform>();
-        SetRect(primaryContainerRect, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(520f, 112f));
+        // Primary button — Duolingo 3D pill (green + 4px bottom shadow)
+        CreatePrimaryButton(card.transform);
 
-        Image primaryShadow = CreateImage("PrimaryShadow", primaryContainer.transform, duoGreenShadow);
-        SetRect(primaryShadow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -6f), new Vector2(520f, 112f));
-
-        Image primaryBg = CreateImage("PrimaryBg", primaryContainer.transform, duoGreen);
-        SetRect(primaryBg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(520f, 100f));
-
-        primaryButton = primaryBg.gameObject.AddComponent<Button>();
-        primaryButton.targetGraphic = primaryBg;
-        primaryButtonImage = primaryBg;
-
-        primaryButtonText = CreateText("PrimaryText", primaryBg.transform, 32, TextAnchor.MiddleCenter, Color.white);
-        primaryButtonText.fontStyle = FontStyle.Bold;
-        Stretch(primaryButtonText.rectTransform);
-        primaryButton.onClick.AddListener(PrimaryAction);
-
-        // Bottom hint bar like Duolingo
-        Image bottomBar = CreateImage("BottomBar", canvasObject.transform, duoWhite);
-        SetRect(bottomBar.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 45f), new Vector2(0f, 90f));
+        // Bottom bar like Duolingo footer
+        Image bottomBar = CreateImage("BottomBar", canvasObject.transform, bgContainer);
+        SetRect(bottomBar.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, Space8 + Space4), new Vector2(0f, Space8 * 2));
         bottomBar.rectTransform.offsetMin = new Vector2(0f, bottomBar.rectTransform.offsetMin.y);
         bottomBar.rectTransform.offsetMax = new Vector2(0f, bottomBar.rectTransform.offsetMax.y);
-        Image bottomBorder = CreateImage("BottomBorder", bottomBar.transform, duoLightGray);
-        SetRect(bottomBorder.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), Vector2.zero, new Vector2(0f, 4f));
+        Image bottomBorder = CreateImage("BottomBorder", bottomBar.transform, border);
+        SetRect(bottomBorder.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), Vector2.zero, new Vector2(0f, BorderWidth));
     }
 
     private void EnsureEventSystem()
     {
-        if (EventSystem.current != null)
-        {
-            return;
-        }
-
+        if (EventSystem.current != null) return;
         var eventSystem = new GameObject("Level 1 EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         eventSystem.transform.SetParent(transform, false);
     }
 
     private Button CreateFireTriangle(Transform parent)
     {
-        // FIX: Graphic subclasses require CanvasRenderer — was missing and spammed MissingComponentException
         var triangleObject = new GameObject("Fire triangle", typeof(RectTransform), typeof(CanvasRenderer), typeof(FireTriangleGraphic), typeof(Button));
         triangleObject.transform.SetParent(parent, false);
         Button button = triangleObject.GetComponent<Button>();
-        FireTriangleGraphic graphic = triangleObject.GetComponent<FireTriangleGraphic>();
-        graphic.color = new Color(1f, 0.45f, 0.05f); // warm orange, Duolingo-like
-        button.targetGraphic = graphic;
-        ColorBlock colors = button.colors;
-        colors.pressedColor = new Color(0.95f, 0.38f, 0.02f);
-        colors.highlightedColor = new Color(1f, 0.55f, 0.15f);
-        button.colors = colors;
-        SetRect(triangleObject.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 25f), new Vector2(520f, 440f));
+        fireTriangleGraphic = triangleObject.GetComponent<FireTriangleGraphic>();
+        fireTriangleGraphic.color = Hex("#ff6b00"); // vibrant orange for fire
+        button.targetGraphic = fireTriangleGraphic;
 
+        // Button states
+        ColorBlock colors = button.colors;
+        colors.highlightedColor = Hex("#ff8533");
+        colors.pressedColor = Hex("#e65c00");
+        colors.disabledColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
+        button.colors = colors;
+
+        SetRect(triangleObject.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, Space4), new Vector2(520f, 440f));
+
+        // Center label
         Text label = CreateText("FireText", triangleObject.transform, 40, TextAnchor.MiddleCenter, Color.white);
         label.fontStyle = FontStyle.Bold;
         label.raycastTarget = false;
-        SetRect(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -10f), new Vector2(260f, 110f));
+        SetRect(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -Space2), new Vector2(260f, 110f));
         label.text = "FIRE\nTRIANGLE";
 
-        // Duolingo-style pill labels
-        AddTriangleLabel(button.transform, "HEAT", new Vector2(0f, 150f), duoRed, Color.white);
-        AddTriangleLabel(button.transform, "FUEL", new Vector2(-155f, -110f), duoYellow, Color.white);
-        AddTriangleLabel(button.transform, "OXYGEN", new Vector2(155f, -110f), duoBlue, Color.white);
+        // Triangle corner labels — pill shaped with design system colors
+        AddTriangleLabel(button.transform, "HEAT", new Vector2(0f, 150f), error, Color.white);
+        AddTriangleLabel(button.transform, "FUEL", new Vector2(-155f, -110f), accentSecondary, Color.white);
+        AddTriangleLabel(button.transform, "OXYGEN", new Vector2(155f, -110f), info, Color.white);
+
         return button;
     }
 
@@ -212,12 +234,91 @@ public sealed class FireBasicsLessonController : MonoBehaviour
     {
         Image labelBackground = CreateImage(text, parent, bgColor);
         labelBackground.raycastTarget = false;
-        SetRect(labelBackground.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), position, new Vector2(176f, 56f));
+        labelBackground.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        labelBackground.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        labelBackground.rectTransform.anchoredPosition = position;
+        labelBackground.rectTransform.sizeDelta = new Vector2(176f, 56f);
+        AddBorder(labelBackground, bgColor, BorderWidth, BorderBottom); // tactile bottom edge
+
         Text label = CreateText(text + " text", labelBackground.transform, 22, TextAnchor.MiddleCenter, textColor);
         label.fontStyle = FontStyle.Bold;
         label.raycastTarget = false;
         Stretch(label.rectTransform);
         label.text = text;
+    }
+
+    private void CreatePrimaryButton(Transform parent)
+    {
+        var container = new GameObject("PrimaryContainer", typeof(RectTransform));
+        container.transform.SetParent(parent, false);
+
+        // Shadow (4px bottom offset, darker accent)
+        primaryButtonShadow = CreateImage("PrimaryShadow", container.transform, accentPressed);
+        SetRect(primaryButtonShadow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -BorderBottom), new Vector2(520f, ControlHeightLg + BorderBottom));
+        primaryButtonShadow.raycastTarget = false;
+
+        // Button background
+        primaryButtonBg = CreateImage("PrimaryBg", container.transform, accent);
+        SetRect(primaryButtonBg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, BorderBottom), new Vector2(520f, ControlHeightLg));
+        AddBorder(primaryButtonBg, accentPressed, BorderWidth, BorderBottom);
+
+        primaryButton = primaryButtonBg.gameObject.AddComponent<Button>();
+        primaryButton.targetGraphic = primaryButtonBg;
+
+        // Button states
+        ColorBlock cb = primaryButton.colors;
+        cb.highlightedColor = accentHover;
+        cb.pressedColor = accent;
+        cb.disabledColor = new Color(accent.r, accent.g, accent.b, 0.5f);
+        primaryButton.colors = cb;
+
+        primaryButtonText = CreateText("PrimaryText", primaryButtonBg.transform, 32, TextAnchor.MiddleCenter, Color.white);
+        primaryButtonText.fontStyle = FontStyle.Bold;
+        Stretch(primaryButtonText.rectTransform);
+        primaryButton.onClick.AddListener(PrimaryAction);
+    }
+
+    private void CreateDuolingoAnswerButton(Transform parent, FireBasicsAnswer answer, int index, out Button button, out Text buttonText, out Image buttonBg, out Image buttonShadow)
+    {
+        // Container holds both shadow and button
+        var container = new GameObject("Answer " + (index + 1), typeof(RectTransform));
+        container.transform.SetParent(parent, false);
+
+        // Shadow (4px bottom offset, light gray)
+        buttonShadow = CreateImage("Shadow", container.transform, border);
+        buttonShadow.raycastTarget = false;
+        Stretch(buttonShadow.rectTransform);
+        buttonShadow.rectTransform.offsetMin = new Vector2(0f, -BorderBottom);
+        buttonShadow.rectTransform.offsetMax = new Vector2(0f, -BorderBottom);
+
+        // Button background (white with 2px border, 4px bottom border)
+        buttonBg = CreateImage("Bg", container.transform, bgContainer);
+        buttonBg.rectTransform.anchorMin = Vector2.zero;
+        buttonBg.rectTransform.anchorMax = Vector2.one;
+        buttonBg.rectTransform.offsetMin = Vector2.zero;
+        buttonBg.rectTransform.offsetMax = new Vector2(0f, 0f);
+        AddBorder(buttonBg, border, BorderWidth, BorderBottom);
+
+        button = buttonBg.gameObject.AddComponent<Button>();
+        button.targetGraphic = buttonBg;
+
+        // Button states (subtle)
+        ColorBlock cb = button.colors;
+        cb.highlightedColor = Hex("#f8f8f8");
+        cb.pressedColor = Hex("#f0f0f0");
+        cb.disabledColor = new Color(0.9f, 0.9f, 0.9f, 0.5f);
+        button.colors = cb;
+
+        buttonText = CreateText("Text", buttonBg.transform, 28, TextAnchor.MiddleCenter, fg);
+        buttonText.fontStyle = FontStyle.Bold;
+        Stretch(buttonText.rectTransform);
+        buttonText.rectTransform.offsetMin = new Vector2(Space6, 0f);
+        buttonText.rectTransform.offsetMax = new Vector2(-Space6, 0f);
+
+        // Position container (caller sets rect on container)
+        SetRect(container.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(Space8 * 2 + Space6) - index * (Space8 + Space2)), new Vector2(820f, ControlHeightLg + BorderBottom));
+
+        button.onClick.AddListener(() => SelectAnswer(answer));
     }
 
     private void PrimaryAction()
@@ -235,7 +336,6 @@ public sealed class FireBasicsLessonController : MonoBehaviour
                 session.Restart();
                 break;
         }
-
         Render();
     }
 
@@ -260,7 +360,7 @@ public sealed class FireBasicsLessonController : MonoBehaviour
             ? "You completed the What is fire? lesson. Follow your facility emergency action plan and only attempt firefighting when authorized, trained, and safe to do so."
             : state.Stage == FireBasicsLearningStage.Question ? state.Question : state.LessonText;
 
-        // Duolingo progress: 20% per stage + 20% per lesson (single lesson demo)
+        // Progress bar (top bar)
         float progress = 0f;
         switch (state.Stage)
         {
@@ -276,71 +376,78 @@ public sealed class FireBasicsLessonController : MonoBehaviour
             progressFill.rectTransform.anchorMax = new Vector2(progress, 1f);
         }
 
+        // Fire triangle visibility
         bool showVisual = state.Stage == FireBasicsLearningStage.Picture
             || state.Stage == FireBasicsLearningStage.Animation
             || state.Stage == FireBasicsLearningStage.Interaction;
         fireTriangleButton.gameObject.SetActive(showVisual);
         fireTriangleButton.interactable = state.Stage == FireBasicsLearningStage.Interaction;
 
+        // Answer buttons
         bool showAnswers = state.Stage == FireBasicsLearningStage.Question;
         for (int index = 0; index < answerButtons.Length; index++)
         {
             answerButtons[index].gameObject.SetActive(showAnswers);
             answerButtonTexts[index].text = state.AnswerOptions[index];
-            // reset to Duolingo default
-            answerButtonImages[index].color = duoWhite;
-            answerButtonTexts[index].color = duoDarkText;
+
+            // Reset to default state (white bg, dark text)
+            answerButtonBgs[index].color = bgContainer;
+            answerButtonTexts[index].color = fg;
+            // Restore border
+            // Note: borders are on the Image component via AddBorder; color change handled by button states
         }
 
+        // Feedback
         bool showFeedback = state.Stage == FireBasicsLearningStage.Feedback;
         feedback.gameObject.SetActive(showFeedback);
-        feedback.text = state.FeedbackText;
-        feedback.color = state.Feedback == FireBasicsFeedback.Correct ? new Color(0.23f, 0.55f, 0.02f) : duoRed;
-
         if (showFeedback)
         {
-            // highlight selected answer — subtle Duolingo feedback
-            // (kept minimal to avoid state bloat; full per-answer highlight can be added with stored selection)
+            feedback.text = state.FeedbackText;
+            feedback.color = state.Feedback == FireBasicsFeedback.Correct ? Hex("#1d5900") : error;
+
+            // Highlight the selected answer (we don't track which was selected, so skip for now)
         }
 
         prompt.text = PromptFor(state.Stage);
-        prompt.color = showFeedback && state.Feedback == FireBasicsFeedback.Correct ? new Color(0.23f, 0.55f, 0.02f) : duoMidText;
+        prompt.color = showFeedback && state.Feedback == FireBasicsFeedback.Correct ? Hex("#1d5900") : muted;
 
+        // Primary button
         bool showPrimary = state.Stage == FireBasicsLearningStage.Picture
             || state.Stage == FireBasicsLearningStage.Feedback
             || state.Stage == FireBasicsLearningStage.Completed;
-        primaryButton.gameObject.transform.parent.gameObject.SetActive(showPrimary);
+        primaryButton.transform.parent.gameObject.SetActive(showPrimary);
         if (showPrimary)
         {
             if (state.Stage == FireBasicsLearningStage.Picture)
             {
                 primaryButtonText.text = "PLAY ANIMATION";
-                primaryButtonImage.color = duoGreen;
+                primaryButtonBg.color = accent;
+                primaryButtonShadow.color = accentPressed;
+                primaryButtonText.color = Color.white;
             }
             else if (state.Stage == FireBasicsLearningStage.Feedback)
             {
                 bool correct = state.Feedback == FireBasicsFeedback.Correct;
                 primaryButtonText.text = correct ? "CONTINUE" : "GOT IT";
-                primaryButtonImage.color = correct ? duoGreen : duoBlue;
-                var shadow = primaryButton.transform.parent.Find("PrimaryShadow") as RectTransform;
-                if (shadow != null)
+                if (correct)
                 {
-                    var img = shadow.GetComponent<Image>();
-                    img.color = correct ? duoGreenShadow : new Color(0.07f, 0.55f, 0.82f);
+                    primaryButtonBg.color = accent;
+                    primaryButtonShadow.color = accentPressed;
+                    primaryButtonText.color = Color.white;
+                }
+                else
+                {
+                    primaryButtonBg.color = info;
+                    primaryButtonShadow.color = new Color(0.07f, 0.55f, 0.82f); // darker info
+                    primaryButtonText.color = Color.white;
                 }
             }
-            else
+            else // Completed
             {
                 primaryButtonText.text = "RESTART LESSON";
-                primaryButtonImage.color = duoWhite;
-                primaryButtonText.color = duoGreen;
-                // white button needs green text + light gray shadow
-                var shadow = primaryButton.transform.parent.Find("PrimaryShadow") as RectTransform;
-                if (shadow != null) shadow.GetComponent<Image>().color = duoLightGray;
-            }
-            if (state.Stage != FireBasicsLearningStage.Completed)
-            {
-                primaryButtonText.color = Color.white;
+                primaryButtonBg.color = bgContainer;
+                primaryButtonShadow.color = border;
+                primaryButtonText.color = accent;
             }
         }
     }
@@ -374,52 +481,25 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         return image;
     }
 
-    private Button CreateDuolingoAnswerButton(string name, Transform parent, out Text buttonText, out Image buttonImage)
+    private static void AddBorder(Image image, Color borderColor, float width, float bottomWidth = -1f)
     {
-        // Container with shadow for Duolingo 3D pill effect
-        var container = new GameObject(name + "Container", typeof(RectTransform));
-        container.transform.SetParent(parent, false);
-        RectTransform containerRect = container.GetComponent<RectTransform>();
-        // size set by caller via SetRect on Button; container is just pass-through, so we return button directly
-        // Instead create shadow + button as siblings inside container and return button
-        // Simpler: create shadow Image first, then button Image on top
-        Image shadow = CreateImage(name + "Shadow", container.transform, duoLightGray);
-        shadow.raycastTarget = false;
-        Stretch(shadow.rectTransform);
-        shadow.rectTransform.offsetMin = new Vector2(0f, -6f);
-        shadow.rectTransform.offsetMax = new Vector2(0f, -6f);
-
-        Image bg = CreateImage(name, container.transform, duoWhite);
-        bg.rectTransform.anchorMin = Vector2.zero;
-        bg.rectTransform.anchorMax = Vector2.one;
-        bg.rectTransform.offsetMin = Vector2.zero;
-        bg.rectTransform.offsetMax = new Vector2(0f, 0f);
-
-        Button button = bg.gameObject.AddComponent<Button>();
-        button.targetGraphic = bg;
-        ColorBlock cb = button.colors;
-        cb.highlightedColor = new Color(0.96f, 0.96f, 0.96f);
-        cb.pressedColor = new Color(0.92f, 0.92f, 0.92f);
-        button.colors = cb;
-
-        buttonText = CreateText("Text", bg.transform, 28, TextAnchor.MiddleCenter, duoDarkText);
-        buttonText.fontStyle = FontStyle.Bold;
-        Stretch(buttonText.rectTransform);
-        buttonText.rectTransform.offsetMin = new Vector2(16f, 0f);
-        buttonText.rectTransform.offsetMax = new Vector2(-16f, 0f);
-
-        // Return button; caller will position container, so move button's container
-        // To keep caller's SetRect working, return container's button but caller sets rect on Button's RectTransform
-        // So reparent logic: caller does SetRect(button.GetComponent<RectTransform>(), ...)
-        // That will position the button, not container. We need to make button fill container and container be the positioned object.
-        // Workaround: make container's RectTransform be the button's RectTransform via moving components
-        // Easiest: just return button and ignore container offset — keep shadow as child offset
-        buttonImage = bg;
-        // Destroy container indirection and make button root — actually keep shadow as child of button's parent
-        // Move shadow and bg under same parent as expected: parent already has container, we keep it
-        // Caller will SetRect on button, but we want container positioned. So set container rect instead next frame?
-        // Fix: return button, but also ensure container rect is synced — caller sets button rect, shadow stays offset correctly
-        return button;
+        // Unity UI doesn't have native border; we simulate with child images
+        // For simplicity, we'll add a bottom border as a separate image
+        // The design system uses 2px sides + 4px bottom on tactile controls
+        if (bottomWidth > 0)
+        {
+            var bottomBorder = new GameObject("BottomBorder", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            bottomBorder.transform.SetParent(image.transform, false);
+            Image img = bottomBorder.GetComponent<Image>();
+            img.color = borderColor;
+            img.raycastTarget = false;
+            RectTransform rt = bottomBorder.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(0f, bottomWidth);
+        }
     }
 
     private static Text CreateText(string name, Transform parent, int fontSize, TextAnchor alignment, Color color)
@@ -452,6 +532,15 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         rectTransform.anchoredPosition = position;
         rectTransform.sizeDelta = size;
     }
+
+    private static Color Hex(string hex)
+    {
+        hex = hex.Replace("#", "");
+        int r = int.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        int g = int.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+        int b = int.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+        return new Color(r / 255f, g / 255f, b / 255f);
+    }
 }
 
 public sealed class FireTriangleGraphic : Graphic
@@ -463,6 +552,7 @@ public sealed class FireTriangleGraphic : Graphic
         UIVertex vertex = UIVertex.simpleVert;
         vertex.color = color;
 
+        // Triangle pointing up (center top, bottom left, bottom right)
         vertex.position = new Vector3(0f, rect.yMax, 0f);
         vertexHelper.AddVert(vertex);
         vertex.position = new Vector3(rect.xMin, rect.yMin, 0f);
