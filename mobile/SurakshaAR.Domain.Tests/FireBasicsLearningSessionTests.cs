@@ -6,13 +6,48 @@ namespace SurakshaAR.Domain.Tests;
 public sealed class FireBasicsLearningSessionTests
 {
     [Test]
+    public void Fire_only_ignites_after_every_element_is_placed_on_the_logs()
+    {
+        var session = new FireBasicsLearningSession();
+        session.BeginPlacing();
+
+        var afterHeat = session.PlaceElement(FireElement.Heat);
+        var afterFuel = session.PlaceElement(FireElement.Fuel);
+        var afterOxygen = session.PlaceElement(FireElement.Oxygen);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(afterHeat.Stage, Is.EqualTo(FireBasicsLearningStage.Placing));
+            Assert.That(afterFuel.Stage, Is.EqualTo(FireBasicsLearningStage.Placing));
+            Assert.That(afterOxygen.Stage, Is.EqualTo(FireBasicsLearningStage.Ignited));
+            Assert.That(afterOxygen.AllElementsPlaced, Is.True);
+        });
+    }
+
+    [Test]
+    public void Fire_does_not_ignite_until_all_three_elements_are_placed()
+    {
+        var session = new FireBasicsLearningSession();
+        session.BeginPlacing();
+
+        session.PlaceElement(FireElement.Heat);
+        session.PlaceElement(FireElement.Fuel);
+        var state = session.FinishIgnition(FireBasicsLearningSession.IgnitionDurationSeconds);
+
+        Assert.That(state.Stage, Is.EqualTo(FireBasicsLearningStage.Placing));
+        Assert.That(state.AllElementsPlaced, Is.False);
+    }
+
+    [Test]
     public void Completing_the_fire_basics_learning_loop_shows_correct_feedback()
     {
         var session = new FireBasicsLearningSession();
+        session.BeginPlacing();
+        session.PlaceElement(FireElement.Heat);
+        session.PlaceElement(FireElement.Fuel);
+        session.PlaceElement(FireElement.Oxygen);
+        session.FinishIgnition(FireBasicsLearningSession.IgnitionDurationSeconds);
 
-        session.ShowAnimation();
-        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
-        var question = session.TapFireTriangle();
         var state = session.Answer(FireBasicsAnswer.HeatFuelAndOxygen);
         var completed = session.Continue();
 
@@ -22,7 +57,6 @@ public sealed class FireBasicsLearningSessionTests
             Assert.That(state.Feedback, Is.EqualTo(FireBasicsFeedback.Correct));
             Assert.That(state.FeedbackText, Does.Contain("heat, fuel, and oxygen"));
             Assert.That(completed.Stage, Is.EqualTo(FireBasicsLearningStage.Completed));
-            Assert.That(question.Question, Is.EqualTo("What three elements sustain a fire?"));
         });
     }
 
@@ -30,10 +64,12 @@ public sealed class FireBasicsLearningSessionTests
     public void Incorrect_answer_shows_corrective_fire_basics_feedback()
     {
         var session = new FireBasicsLearningSession();
+        session.BeginPlacing();
+        session.PlaceElement(FireElement.Heat);
+        session.PlaceElement(FireElement.Fuel);
+        session.PlaceElement(FireElement.Oxygen);
+        session.FinishIgnition(FireBasicsLearningSession.IgnitionDurationSeconds);
 
-        session.ShowAnimation();
-        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
-        session.TapFireTriangle();
         var state = session.Answer(FireBasicsAnswer.SmokeAndFlames);
 
         Assert.Multiple(() =>
@@ -49,29 +85,15 @@ public sealed class FireBasicsLearningSessionTests
     {
         var session = new FireBasicsLearningSession();
 
-        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
-        session.TapFireTriangle();
-        session.Answer(FireBasicsAnswer.HeatFuelAndOxygen);
+        session.PlaceElement(FireElement.Heat);
+        Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Triangle));
 
-        Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Picture));
+        session.BeginPlacing();
+        session.FinishIgnition(FireBasicsLearningSession.IgnitionDurationSeconds);
+        Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Placing));
 
-        session.ShowAnimation();
-        session.TapFireTriangle();
-        Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Animation));
-
-        session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds);
-        session.Answer(FireBasicsAnswer.HeatFuelAndOxygen);
-        Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Interaction));
-    }
-
-    [Test]
-    public void Short_animation_does_not_enable_the_fire_triangle_interaction()
-    {
-        var session = new FireBasicsLearningSession();
-
-        session.ShowAnimation();
-        var state = session.FinishAnimation(FireBasicsLearningSession.AnimationDurationSeconds - 0.1f);
-
-        Assert.That(state.Stage, Is.EqualTo(FireBasicsLearningStage.Animation));
+        session.PlaceElement(FireElement.Heat);
+        session.PlaceElement(FireElement.Heat);
+        Assert.That(session.State.Stage, Is.EqualTo(FireBasicsLearningStage.Placing));
     }
 }

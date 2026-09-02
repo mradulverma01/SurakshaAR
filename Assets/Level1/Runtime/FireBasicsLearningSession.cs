@@ -4,12 +4,19 @@ namespace SurakshaAR.Level1
 {
     public enum FireBasicsLearningStage
     {
-        Picture,
-        Animation,
-        Interaction,
+        Triangle,
+        Placing,
+        Ignited,
         Question,
         Feedback,
         Completed,
+    }
+
+    public enum FireElement
+    {
+        Heat,
+        Fuel,
+        Oxygen,
     }
 
     public enum FireBasicsAnswer
@@ -28,11 +35,16 @@ namespace SurakshaAR.Level1
 
     public sealed class FireBasicsLearningState
     {
-        internal FireBasicsLearningState(FireBasicsLearningStage stage, FireBasicsFeedback feedback, string feedbackText)
+        internal FireBasicsLearningState(
+            FireBasicsLearningStage stage,
+            FireBasicsFeedback feedback,
+            string feedbackText,
+            IReadOnlyList<FireElement>? placedElements)
         {
             Stage = stage;
             Feedback = feedback;
             FeedbackText = feedbackText;
+            PlacedElements = placedElements ?? new List<FireElement>();
         }
 
         public FireBasicsLearningStage Stage { get; }
@@ -40,6 +52,10 @@ namespace SurakshaAR.Level1
         public FireBasicsFeedback Feedback { get; }
 
         public string FeedbackText { get; }
+
+        public IReadOnlyList<FireElement> PlacedElements { get; }
+
+        public bool AllElementsPlaced => PlacedElements.Count == 3;
 
         public string Title => "What is fire?";
 
@@ -59,30 +75,51 @@ namespace SurakshaAR.Level1
 
     public sealed class FireBasicsLearningSession
     {
-        public const float AnimationDurationSeconds = 2.4f;
+        public const float IgnitionDurationSeconds = 1.6f;
 
-        private FireBasicsLearningState state = NewState(FireBasicsLearningStage.Picture);
+        private FireBasicsLearningState state;
+        private readonly List<FireElement> placedElements = new List<FireElement>();
+
+        public FireBasicsLearningSession()
+        {
+            state = NewState(FireBasicsLearningStage.Triangle);
+        }
 
         public FireBasicsLearningState State => state;
 
-        public FireBasicsLearningState ShowAnimation()
+        public FireBasicsLearningState BeginPlacing()
         {
-            return Advance(FireBasicsLearningStage.Picture, FireBasicsLearningStage.Animation);
+            return Advance(FireBasicsLearningStage.Triangle, FireBasicsLearningStage.Placing);
         }
 
-        public FireBasicsLearningState FinishAnimation(float elapsedSeconds)
+        public FireBasicsLearningState PlaceElement(FireElement element)
         {
-            if (elapsedSeconds < AnimationDurationSeconds)
+            if (state.Stage != FireBasicsLearningStage.Placing)
             {
                 return state;
             }
 
-            return Advance(FireBasicsLearningStage.Animation, FireBasicsLearningStage.Interaction);
+            if (placedElements.Contains(element))
+            {
+                return state;
+            }
+
+            placedElements.Add(element);
+            FireBasicsLearningStage next = placedElements.Count == 3
+                ? FireBasicsLearningStage.Ignited
+                : FireBasicsLearningStage.Placing;
+            state = new FireBasicsLearningState(next, FireBasicsFeedback.None, string.Empty, placedElements);
+            return state;
         }
 
-        public FireBasicsLearningState TapFireTriangle()
+        public FireBasicsLearningState FinishIgnition(float elapsedSeconds)
         {
-            return Advance(FireBasicsLearningStage.Interaction, FireBasicsLearningStage.Question);
+            if (elapsedSeconds < IgnitionDurationSeconds)
+            {
+                return state;
+            }
+
+            return Advance(FireBasicsLearningStage.Ignited, FireBasicsLearningStage.Question);
         }
 
         public FireBasicsLearningState Answer(FireBasicsAnswer answer)
@@ -98,7 +135,8 @@ namespace SurakshaAR.Level1
                 correct ? FireBasicsFeedback.Correct : FireBasicsFeedback.Incorrect,
                 correct
                     ? "Correct. Heat, fuel, and oxygen must be present for a fire to continue."
-                    : "Not quite. A fire needs heat, fuel, and oxygen. Leave immediately when smoke, toxic gases, or heat make an area unsafe.");
+                    : "Not quite. A fire needs heat, fuel, and oxygen. Leave immediately when smoke, toxic gases, or heat make an area unsafe.",
+                placedElements);
             return state;
         }
 
@@ -111,7 +149,8 @@ namespace SurakshaAR.Level1
         {
             if (state.Stage == FireBasicsLearningStage.Completed)
             {
-                state = NewState(FireBasicsLearningStage.Picture);
+                placedElements.Clear();
+                state = NewState(FireBasicsLearningStage.Triangle);
             }
 
             return state;
@@ -127,9 +166,9 @@ namespace SurakshaAR.Level1
             return state;
         }
 
-        private static FireBasicsLearningState NewState(FireBasicsLearningStage stage)
+        private FireBasicsLearningState NewState(FireBasicsLearningStage stage)
         {
-            return new FireBasicsLearningState(stage, FireBasicsFeedback.None, string.Empty);
+            return new FireBasicsLearningState(stage, FireBasicsFeedback.None, string.Empty, placedElements);
         }
     }
 }
