@@ -32,6 +32,7 @@ public sealed class FireBasicsLessonController : MonoBehaviour
 
     // Cached sprites loaded from Assets/Level1/Resources (application-agnostic)
     private static Sprite fireTriangleSprite;
+    private static Sprite logsSprite;
     private static Sprite logsWithFireSprite;
     private static Sprite chipHeatSprite;
     private static Sprite chipOxygenSprite;
@@ -53,6 +54,7 @@ public sealed class FireBasicsLessonController : MonoBehaviour
     private Text placePrompt = null!;
     private FireElementChip[] chips = new FireElementChip[3];
     private Image dropZone = null!;
+    private Image woodImage = null!;
     private float ignitionStartedAt;
     private bool ignitionTicking;
 
@@ -237,17 +239,19 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         placingRoot.transform.SetParent(canvas, false);
         SetRect(placingRoot.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -470f), new Vector2(ColWidth, 700f));
 
-        // Wood logs backdrop (reference image) — placed first so the drop ring shows above it
+        // Wood logs backdrop (reference image) — placed first so the drop ring shows above it.
+        // Placing shows the plain logs; the burning-logs image only appears after ignition.
+        if (logsSprite == null) logsSprite = LoadSprite("logs");
         if (logsWithFireSprite == null) logsWithFireSprite = LoadSprite("logs_with_fire");
-        Image logsImg = CreateImage("Wood Logs", placingRoot.transform, Color.white);
-        logsImg.sprite = logsWithFireSprite;
-        logsImg.type = Image.Type.Simple;
-        logsImg.preserveAspect = true;
-        logsImg.raycastTarget = false;
-        logsImg.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-        logsImg.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        logsImg.rectTransform.anchoredPosition = new Vector2(0f, -20f);
-        logsImg.rectTransform.sizeDelta = new Vector2(420f, 300f);
+        woodImage = CreateImage("Wood Logs", placingRoot.transform, Color.white);
+        woodImage.sprite = logsSprite;
+        woodImage.type = Image.Type.Simple;
+        woodImage.preserveAspect = true;
+        woodImage.raycastTarget = false;
+        woodImage.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        woodImage.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        woodImage.rectTransform.anchoredPosition = new Vector2(0f, -20f);
+        woodImage.rectTransform.sizeDelta = new Vector2(420f, 300f);
 
         // Drop zone hint (ring where elements must be placed)
         dropZone = CreateImage("DropHint", placingRoot.transform, new Color(0.15f, 0.75f, 0.1f, 0.06f));
@@ -580,6 +584,14 @@ public sealed class FireBasicsLessonController : MonoBehaviour
         placingRoot.SetActive(showPlacing || showIgnited);
         fireRoot.SetActive(showIgnited);
         if (placePrompt != null) placePrompt.gameObject.SetActive(showPlacing);
+
+        // Wood shows the plain logs while dragging; the burning-logs photo replaces it
+        // only once the seam reports ignition (all three elements placed).
+        if (woodImage != null && logsSprite != null && logsWithFireSprite != null)
+        {
+            woodImage.sprite = showIgnited ? logsWithFireSprite : logsSprite;
+        }
+        if (dropZone != null) dropZone.gameObject.SetActive(showPlacing);
 
         if (showIgnited && !ignitionTicking)
         {
