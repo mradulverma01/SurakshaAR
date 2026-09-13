@@ -230,7 +230,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.8.12",
+      "version": "1.8.13",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -313,7 +313,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.management": {
-      "version": "4.5.4",
+      "version": "4.6.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {

@@ -17,6 +17,7 @@ namespace SurakshaAR.Editor
             }
 
             Directory.CreateDirectory("Builds");
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.Mono2x);
             var report = BuildPipeline.BuildPlayer(
                 scenes,
                 "Builds/SurakshaAR-dev.apk",
