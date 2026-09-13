@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using SurakshaAR.Application;
 
 namespace SurakshaAR.Editor
 {
@@ -118,7 +119,7 @@ namespace SurakshaAR.Editor
         {
             var go = new GameObject("Button_" + label); go.transform.SetParent(parent, false);
             var rect = go.AddComponent<RectTransform>(); rect.anchoredPosition = pos; rect.sizeDelta = new Vector2(260, 36);
-            var img = go.AddComponent<Image>(); img.color = new Color(0.16f, 0.45f, 1f);
+            var img = go.AddComponent<Image>(); img.color = MobilePalette.ForestGreen;
             var btn = go.AddComponent<Button>();
             var txtObj = new GameObject("Text"); txtObj.transform.SetParent(go.transform, false);
             var txt = txtObj.AddComponent<Text>(); txt.text = label; txt.alignment = TextAnchor.MiddleCenter; txt.color = Color.white; txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -149,7 +150,7 @@ namespace SurakshaAR.Editor
         {
             var go = new GameObject("Card_" + title); go.transform.SetParent(parent, false);
             var rect = go.AddComponent<RectTransform>(); rect.anchoredPosition = pos; rect.sizeDelta = new Vector2(340, 50);
-            var img = go.AddComponent<Image>(); img.color = new Color(1, 1, 1, 0.08f);
+            var img = go.AddComponent<Image>(); img.color = MobilePalette.WithAlpha(MobilePalette.EarthyTaupeBrown, 0.45f);
             CreateLabel(go.transform, title, 14, new Vector2(0, 8)); CreateLabel(go.transform, subtitle, 10, new Vector2(0, -12));
         }
 
@@ -157,7 +158,7 @@ namespace SurakshaAR.Editor
         {
             var go = new GameObject("ProgressBar"); go.transform.SetParent(parent, false);
             var rect = go.AddComponent<RectTransform>(); rect.anchoredPosition = pos; rect.sizeDelta = new Vector2(300, 12);
-            var img = go.AddComponent<Image>(); img.color = new Color(1, 1, 1, 0.15f);
+            var img = go.AddComponent<Image>(); img.color = MobilePalette.WithAlpha(MobilePalette.SageGreen, 0.55f);
         }
 
         private static void EnsureFolder(string path)

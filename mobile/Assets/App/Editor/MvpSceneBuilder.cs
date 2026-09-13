@@ -34,26 +34,26 @@ namespace SurakshaAR.Editor
                 "FireScenario",
                 new[]
                 {
-                    Target("Fire", "identify_hazard", "select", "electrical_fire", new Vector3(0f, 0.25f, 1.5f), Color.red),
-                    Target("CO2 Extinguisher", "select_extinguisher", "select", "co2_extinguisher", new Vector3(-0.8f, 0.25f, 1.1f), Color.white),
-                    Target("Water Extinguisher", "wrong_extinguisher", "select", "water_extinguisher", new Vector3(0.8f, 0.25f, 1.1f), Color.blue),
-                    Target("Safety Pin", "remove_pin", "interact", "extinguisher_pin", new Vector3(-0.8f, 0.65f, 1.1f), Color.yellow),
-                    Target("Fire Base", "aim", "aim", "fire_base", new Vector3(0f, 0.05f, 1.5f), new Color(1f, 0.45f, 0f)),
-                    Target("Handle", "discharge", "hold", "extinguisher_handle", new Vector3(-0.8f, 0.9f, 1.1f), Color.gray),
-                    Target("Safe Exit", "exit_route", "waypoint_sequence", "safe_exit_a", new Vector3(1.2f, 0.5f, 2.4f), Color.green),
+                    Target("Fire", "identify_hazard", "select", "electrical_fire", new Vector3(0f, 0.25f, 1.5f), MobilePalette.EarthyTaupeBrown),
+                    Target("CO2 Extinguisher", "select_extinguisher", "select", "co2_extinguisher", new Vector3(-0.8f, 0.25f, 1.1f), MobilePalette.ForestGreen),
+                    Target("Water Extinguisher", "wrong_extinguisher", "select", "water_extinguisher", new Vector3(0.8f, 0.25f, 1.1f), MobilePalette.DeepMossCharcoal),
+                    Target("Safety Pin", "remove_pin", "interact", "extinguisher_pin", new Vector3(-0.8f, 0.65f, 1.1f), MobilePalette.SageGreen),
+                    Target("Fire Base", "aim", "aim", "fire_base", new Vector3(0f, 0.05f, 1.5f), MobilePalette.EarthyTaupeBrown),
+                    Target("Handle", "discharge", "hold", "extinguisher_handle", new Vector3(-0.8f, 0.9f, 1.1f), MobilePalette.DarkEspresso),
+                    Target("Safe Exit", "exit_route", "waypoint_sequence", "safe_exit_a", new Vector3(1.2f, 0.5f, 2.4f), MobilePalette.SageGreen),
                 });
 
             var gasPrefab = CreateScenarioPrefab(
                 "GasScenario",
                 new[]
                 {
-                    Target("Methane Hazard", "recognize_hazard_zone", "select", "methane_hazard_zone", new Vector3(0f, 0.35f, 1.6f), new Color(0.75f, 0.2f, 0.85f)),
-                    Target("Unsafe Gas Entry", "enter_hazard_zone", "waypoint_enter", "methane_hazard_zone", new Vector3(0f, 0.05f, 1.6f), Color.red),
-                    Target("Safe Zone", "withdraw", "waypoint_enter", "safe_zone", new Vector3(-1.1f, 0.1f, 0.8f), Color.green),
-                    Target("Supervisor Radio", "report_hazard", "interact", "supervisor_radio", new Vector3(-0.7f, 0.35f, 1.1f), Color.cyan),
-                    Target("Self Rescuer", "select_ppe", "select", "approved_self_rescuer", new Vector3(0.7f, 0.3f, 1.1f), Color.yellow),
-                    Target("Buddy", "buddy_check", "confirm", "buddy_present", new Vector3(1.1f, 0.75f, 1.6f), Color.white),
-                    Target("Safe Exit", "exit_route", "waypoint_sequence", "safe_exit_a", new Vector3(0f, 0.5f, 2.6f), Color.green),
+                    Target("Methane Hazard", "recognize_hazard_zone", "select", "methane_hazard_zone", new Vector3(0f, 0.35f, 1.6f), MobilePalette.EarthyTaupeBrown),
+                    Target("Unsafe Gas Entry", "enter_hazard_zone", "waypoint_enter", "methane_hazard_zone", new Vector3(0f, 0.05f, 1.6f), MobilePalette.DeepMossCharcoal),
+                    Target("Safe Zone", "withdraw", "waypoint_enter", "safe_zone", new Vector3(-1.1f, 0.1f, 0.8f), MobilePalette.SageGreen),
+                    Target("Supervisor Radio", "report_hazard", "interact", "supervisor_radio", new Vector3(-0.7f, 0.35f, 1.1f), MobilePalette.ForestGreen),
+                    Target("Self Rescuer", "select_ppe", "select", "approved_self_rescuer", new Vector3(0.7f, 0.3f, 1.1f), MobilePalette.ForestGreen),
+                    Target("Buddy", "buddy_check", "confirm", "buddy_present", new Vector3(1.1f, 0.75f, 1.6f), MobilePalette.DarkEspresso),
+                    Target("Safe Exit", "exit_route", "waypoint_sequence", "safe_exit_a", new Vector3(0f, 0.5f, 2.6f), MobilePalette.SageGreen),
                 });
 
             var fireScene = CreateTrainingScene("FireTraining", "fire_001", firePrefab);
@@ -229,13 +229,13 @@ namespace SurakshaAR.Editor
             {
                 perBuildTarget = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
                 AssetDatabase.CreateAsset(perBuildTarget, "Assets/XR/Settings/XRGeneralSettingsPerBuildTarget.asset");
-                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, perBuildTarget, true);
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, perBuildTarget, true);
             }
             else
             {
                 var settingsPath = AssetDatabase.GUIDToAssetPath(settingsGuids[0]);
                 perBuildTarget = AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>(settingsPath);
-                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, perBuildTarget, true);
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, perBuildTarget, true);
             }
 
             if (!perBuildTarget.HasManagerSettingsForBuildTarget(BuildTargetGroup.Android))
