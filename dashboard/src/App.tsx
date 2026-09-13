@@ -1,7 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { backendConfigured, demoDashboard, loadDashboard, signIn, signOut, verifyCertificate } from "./data";
-import type { CertificateVerification, DashboardData } from "./types";
+import {
+  backendConfigured,
+  demoDashboard,
+  filterAttempts,
+  filterCertificates,
+  loadDashboard,
+  signIn,
+  signOut,
+  toDashboardLoadState,
+  verifyCertificate,
+} from "./data";
+import type { AttemptFilter, CertificateFilter, CertificateVerification, DashboardData } from "./types";
 
 function Metric({ label, value, unit }: { label: string; value: number; unit?: string }) {
   return (
@@ -13,26 +23,44 @@ function Metric({ label, value, unit }: { label: string; value: number; unit?: s
 }
 
 function Dashboard() {
-  const [data, setData] = useState<DashboardData>(demoDashboard);
+  const [data, setData] = useState<DashboardData | null>(backendConfigured ? null : demoDashboard);
   const [error, setError] = useState<string>();
+  const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(!backendConfigured);
+  const [attemptFilter, setAttemptFilter] = useState<AttemptFilter>({});
+  const [certificateFilter, setCertificateFilter] = useState<CertificateFilter>({});
 
-  const refresh = () => {
+  const refresh = async () => {
+    setLoading(true);
     setError(undefined);
-    loadDashboard().then((next) => {
+    try {
+      const next = await loadDashboard();
       setData(next);
       setAuthenticated(true);
-    }).catch((reason: unknown) => {
+    } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : "Dashboard failed to load");
-    });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, []);
+
+  const state = toDashboardLoadState(data, error ?? null, loading);
+  const attempts = useMemo(() => filterAttempts(data?.recentAttempts ?? [], attemptFilter), [data, attemptFilter]);
+  const certificates = useMemo(() => filterCertificates(data?.recentCertificates ?? [], certificateFilter), [data, certificateFilter]);
+  const modules = useMemo(
+    () => Array.from(new Set((data?.recentAttempts ?? []).map((attempt) => attempt.moduleName))),
+    [data],
+  );
 
   if (backendConfigured && !authenticated) {
     return <Login error={error} onAuthenticated={refresh} />;
+  }
+  if (!data) {
+    return <main className="shell"><p className="empty">{state.status === "error" ? state.error : "Loading compliance records..."}</p></main>;
   }
 
   return (
@@ -49,7 +77,9 @@ function Dashboard() {
       </header>
 
       {data.isDemo && <div className="demo-strip">Demo data. Connect Supabase to show organization records.</div>}
-      {error && <div className="error-strip">{error}</div>}
+      {loading && <div className="demo-strip" role="status">Loading compliance records...</div>}
+      {error && <div className="error-strip" role="alert">{error}</div>}
+      {state.status === "empty" && <p className="empty">No compliance records have synced yet.</p>}
 
       <section className="metrics" aria-label="Training metrics">
         <Metric label="Workers trained" value={data.workersTrained} />
@@ -87,11 +117,17 @@ function Dashboard() {
           <h2>Recent attempts</h2>
           <span>Server-validated results</span>
         </div>
+        <div>
+          <label>Search attempts <input value={attemptFilter.search ?? ""} onChange={(event) => setAttemptFilter((current) => ({ ...current, search: event.target.value }))} placeholder="Worker, module, or ID" /></label>
+          <label>Module <select value={attemptFilter.moduleName ?? ""} onChange={(event) => setAttemptFilter((current) => ({ ...current, moduleName: event.target.value }))}><option value="">All modules</option>{modules.map((module) => <option key={module} value={module}>{module}</option>)}</select></label>
+          <label>Result <select value={attemptFilter.result ?? "all"} onChange={(event) => setAttemptFilter((current) => ({ ...current, result: event.target.value as AttemptFilter["result"] }))}><option value="all">All results</option><option value="passed">Passed</option><option value="failed">Failed</option><option value="critical_failure">Critical failure</option></select></label>
+        </div>
         <div className="table-wrap">
           <table>
             <thead><tr><th>Worker</th><th>Module</th><th>Score</th><th>Result</th><th>Completed</th></tr></thead>
             <tbody>
-              {data.recentAttempts.map((attempt) => (
+              {attempts.length === 0 && <tr><td colSpan={5}><p className="empty">No attempts match these filters.</p></td></tr>}
+              {attempts.map((attempt) => (
                 <tr key={attempt.id}>
                   <td>{attempt.workerName}</td>
                   <td>{attempt.moduleName}</td>
@@ -110,8 +146,14 @@ function Dashboard() {
           <h2>Issued certificates</h2>
           <span>QR links expose only opaque codes</span>
         </div>
+        <div>
+          <label>Search certificates <input value={certificateFilter.search ?? ""} onChange={(event) => setCertificateFilter((current) => ({ ...current, search: event.target.value }))} placeholder="Worker, module, or code" /></label>
+          <label>Module <select value={certificateFilter.moduleName ?? ""} onChange={(event) => setCertificateFilter((current) => ({ ...current, moduleName: event.target.value }))}><option value="">All modules</option>{modules.map((module) => <option key={module} value={module}>{module}</option>)}</select></label>
+          <label>Status <select value={certificateFilter.status ?? "all"} onChange={(event) => setCertificateFilter((current) => ({ ...current, status: event.target.value as CertificateFilter["status"] }))}><option value="all">All statuses</option><option value="valid">Valid</option><option value="revoked">Revoked</option><option value="expired">Expired</option></select></label>
+        </div>
         <div className="certificate-grid">
-          {data.recentCertificates.map((certificate) => (
+          {certificates.length === 0 && <p className="empty">No certificates match these filters.</p>}
+          {certificates.map((certificate) => (
             <article className="certificate-item" key={certificate.code}>
               <QRCodeSVG value={`${window.location.origin}/verify/${certificate.code}`} size={86} />
               <div>
