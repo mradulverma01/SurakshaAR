@@ -137,7 +137,7 @@ namespace SurakshaAR.Application
 
             var installRoot = contentInstaller.InstallRoot;
             catalog = new JsonTrainingCatalog(Path.Combine(installRoot, "Scenarios"));
-            attemptStore = new JsonAttemptStore(Path.Combine(Application.persistentDataPath, "attempts.json"));
+            attemptStore = new JsonAttemptStore(Path.Combine(UnityEngine.Application.persistentDataPath, "attempts.json"));
             availableBundles = await catalog.List().ConfigureAwait(false);
             if (availableBundles.Count == 0)
             {
@@ -245,7 +245,7 @@ namespace SurakshaAR.Application
             if (synchronizing
                 || attemptStore == null
                 || attemptRemote == null
-                || Application.internetReachability == NetworkReachability.NotReachable)
+                || UnityEngine.Application.internetReachability == NetworkReachability.NotReachable)
             {
                 return;
             }

@@ -36,7 +36,7 @@ namespace SurakshaAR.Application
             session = new SupabaseSessionTokenProvider(
                 supabaseUrl,
                 publishableKey,
-                new JsonProvisionedWorkerStore(Path.Combine(Application.persistentDataPath, "provisioned-worker.json")));
+                new JsonProvisionedWorkerStore(Path.Combine(UnityEngine.Application.persistentDataPath, "provisioned-worker.json")));
             if (session.HasProvisionedWorker)
             {
                 coordinator.ProvisionWorker(session.WorkerId);
